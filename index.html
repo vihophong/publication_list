@@ -38,53 +38,252 @@
     </nav>
     
     <main role="main" class="container">
+        <!-- <tr>
+            <td><h4>Select a BibTex File to Load:</h4></td>
+            <td><input type="file" id="fileToLoad"></td>
+            <td><button onclick="loadFileAsText()">Load Selected File</button><td>
+        </tr> -->
+        <div class="container">
+            <div class="row justify-content-md-left">
+                <div class="col-md-auto">
+                    <h5>Citation Style:</h5>
+                </div>
+                <div class="col-md-auto">
+                    <select id="ddlViewBy">
+                        <option value="1" selected="selected">APS</option>
+                        <option value="2">APA</option>
+                        <option value="3">Vancouver</option>
+                        <option value="4">Havard</option>
+                    </select>
+                </div>
+              </div>
+        </div>
+
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-auto">
+                    <h5> Choose a bibtex file: </h5>
+                    <!-- <input type="file" class="custom-file-input" id="fileToLoad"> -->
+                    <!-- <label class="custom-file-label" for="validatedCustomFile">Choose a Bibtex file</label> -->
+                </div>
+                <div class="col-md-auto">
+                    <input type="file" id="fileToLoad">
+                    <!-- <input type="file" class="custom-file-input" id="fileToLoad"> -->
+                    <!-- <label class="custom-file-label" for="validatedCustomFile">Choose a Bibtex file</label> -->
+                </div>
+            </div>
+            
+            <div class="row justify-content-md-center">
+            <div class="col-md-6">
+                <textarea class="form-control" id="element" placeholder="Or put Bibtex or DOI lines here" rows="10"></textarea>
+            </div>
+            </div>
+
+            <div class="row justify-content-md-center">
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary mb-2" onclick="loadFileAsText()">Print Output</button> 
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
         <div class="jumbotron">
-            <h1>List of publications</h1>
-            <p class="lead" id="element">
-                Pin a fixed-height footer to the bottom of the viewport in desktop browsers with this custom HTML and CSS.
+            <h3>Output</h3>
+            <p class="lead" id="element2">
             </p>      
         </div>
+        <hr>
+        <!-- <div class="jumbotron">
+            <h3>Bibtex</h3>
+            <p class="lead" id="element"> 
+            </p>      
+        </div> -->
 
     
     <script type="text/javascript">
-        async function getData(url) {
-            const response = await fetch(url);
-            return response.json();
-        }
-        window.onload = async function () {
-            const jsondata = await getData("publication_list.json")
+        // async function citationjs_execution_bibtextout(textFromFileLoaded){
+        //     let Cite = require('citation-js')
+        //     let cite = await Cite.async(textFromFileLoaded)
+        //     var e = document.getElementById("ddlViewBy")
+        //     let bibliography_i = cite.format('bibliography', {
+        //         format: 'text',
+        //         lang: 'en-US'
+        //     })
+        //     let element2 = document.getElementById('element2')
+        //     element2.innerHTML = bibliography_i
+        // }
+        async function citationjs_execution(textFromFileLoaded,append){
             let Cite = require('citation-js')
-            let bibliography = "<ol>";
-                for (let i in jsondata.citations) {
-                    let cite = await Cite.async(jsondata.citations[i])
-                    let bibliography_i = cite.format('bibliography', {
-                        format: 'html',
-                        template: 'apa',
-                        lang: 'en-US',
-                        // append: function (entry) {
-                        //     return '[' + entry.journal + ']: '
-                        // }
-                    })
-                    if (jsondata.urls[i]!="")
-                        bibliography += "<li>" +"<a href=\""+ jsondata.urls[i] + " \"target=\"_blank\">"+bibliography_i + "</a></li>"
-                    else
-                        bibliography += "<li>" +bibliography_i + "</li>"
+            let cite = await Cite.async(textFromFileLoaded)
+
+            var e = document.getElementById("ddlViewBy")
+            let bibliography_i = ""
+            // console.log(e.value)
+            if (e.value==="2"){
+                bibliography_i = cite.format('bibliography', {
+                    format: 'html',
+                    template: 'apa',
+                    // template: 'vancouver',
+                    // template: 'harvard1',
+                    prepend: `- `,
+                    lang: 'en-US'
+                })
+            }
+            if (e.value==="3"){
+                bibliography_i = cite.format('bibliography', {
+                    format: 'html',
+                    // template: 'apa',
+                    template: 'vancouver',
+                    // template: 'harvard1',
+                    prepend: `- `,
+                    lang: 'en-US'
+                })
+                return bibliography_i;
+            }
+            if (e.value==="4"){
+                bibliography_i = cite.format('bibliography', {
+                    format: 'html',
+                    // template: 'apa',
+                    // template: 'vancouver',
+                    template: 'harvard1',
+                    prepend: `- `,
+                    lang: 'en-US'
+                })
+                // let element2 = document.getElementById('element2')
+                // element2.innerHTML = bibliography_i
+            }
+            if (e.value==="1"){
+                bibliography_i = cite.format('bibliography', {
+                    format: 'html',
+                    template: 'apa',
+                    // template: 'vancouver',
+                    // template: 'harvard1',
+                    lang: 'en-US',
+                    prepend: `**`,
+                    append: function (entry) {
+                        // console.log(entry)
+                        
+                        let reformat = '##'
+                        for (let i = 0; i < entry.author.length; i++) {
+                            if (entry.author[i]["given"] === undefined && entry.author[i]["family"] === "others"){
+                                reformat+=" <i>et al.</i>"
+                            }else{
+                                if (i === 0){
+                                    var stringArray = entry.author[i]["given"].split(" ");
+                                    let strgivennames = ""
+                                    for (let j = 0; j < stringArray.length; j++){
+                                        // console.log(stringArray[j])
+                                        strgivennames+=stringArray[j][0]+". "
+                                    }
+                                    reformat+=strgivennames+entry.author[i]["family"]
+                                }else{
+                                    var stringArray = entry.author[i]["given"].split(" ");
+                                    let strgivennames = ""
+                                    for (let j = 0; j < stringArray.length; j++){
+                                        strgivennames+=stringArray[j][0]+". "
+                                    }
+                                    reformat+=", "+strgivennames+entry.author[i]["family"]
+                                }
+                            }
+                        }
+                        reformat+= ", "
+                        let pentry = ""
+                        if (entry["URL"] === undefined){
+                            pentry = ""
+                        }else{
+                            pentry+=`<a href="`+entry["URL"]+`" target="_blank">`
+                        }
+                        pentry+=entry["container-title"]+" <b>"+entry["volume"]+"</b>, "
+                        // reformat+=entry["page"]
+                        var stringPage = entry["page"].split("-");
+                        pentry+=stringPage[0]
+                        pentry+=" ("+entry["issued"]["date-parts"][0][0]+")"
+                        if (entry["URL"] === undefined){
+                            pentry += ""
+                        }else{
+                            pentry+=`</a>`
+                        }
+                        
+                        reformat+=pentry+"."
+                        // reformat+= entry["issued"]["date-parts"][0]
+                        return reformat
+                    }
+                })
+
+                var indexesbeg = []
+                var i = -1;
+                while ((i = bibliography_i.indexOf("**", i+1)) != -1){
+                    indexesbeg.push(i);
+                    // console.log(i);
                 }
-                bibliography+="</ol>"
+                var indexesend = []
+                i=-1;
+                while ((i = bibliography_i.indexOf("##", i+1)) != -1){
+                    indexesend.push(i);
+                    // console.log(i);
+                }
+                var bibliography_i_cpy = bibliography_i
+                for (let j = 0; j < indexesbeg.length; j++){
+                    var strtobereplace = bibliography_i_cpy.substring(indexesbeg[j], indexesend[j]+2)
+                    // bibliography_i = bibliography_i.replace(strtobereplace, (j+1)+". ");
+                    bibliography_i = bibliography_i.replace(strtobereplace, "- ");
+                    console.log(j);
+                }
+                
+            }
+            let element2 = document.getElementById('element2')
+            if (append==0)
+                element2.innerHTML = bibliography_i
+            else
+                element2.innerHTML+=bibliography_i
+        };
+
+        function loadFileAsText(){
+            var fileToLoad = document.getElementById("fileToLoad").files[0];
+
+            var fileReader = new FileReader();
+            let element = document.getElementById('element')
+            let textFromTextBox = element.value
+
+            if (textFromTextBox.indexOf("@",) == -1)
+            {
+                let element2 = document.getElementById('element2')
+                element2.innerHTML=""
+                textFromTextBoxLines = textFromTextBox.split("\n")
+                for (let j = 0; j < textFromTextBoxLines.length; j++){
+                    console.log(textFromTextBoxLines[j])
+                    citationjs_execution(textFromTextBoxLines[j],1)
+                }
+                // citationjs_execution(textFromTextBox,1)
+            }else{
+                citationjs_execution(textFromTextBox,0)
+            }
+            
+            fileReader.onload = async function(fileLoadedEvent){
+                var textFromFileLoaded = fileLoadedEvent.target.result;
                 let element = document.getElementById('element')
-                element.innerHTML = bibliography
-                _altmetric_embed_init()
-            }        
+                element.innerHTML = textFromFileLoaded
+                citationjs_execution(textFromFileLoaded,0)
+            };
+            if (fileToLoad===undefined)
+            {
+                console.log("no input")
+            }else{
+                fileReader.readAsText(fileToLoad, "UTF-8")
+            }
+                
+        }
     </script>
+
+
     </main><!-- /.container -->
-    
-        
         <!-- Bootstrap core JavaScript
             ================================================== -->
             <!-- Placed at the end of the document so the pages load faster -->
             <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
             <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
             <script src="https://getbootstrap.com/docs/4.0/dist/js/bootstrap.min.js"></script>
-        </body>
-        </html>
+</body>
+</html>
         

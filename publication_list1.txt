@@ -1,0 +1,10 @@
+@article{qi2019recent,
+  title={Recent developments in radioactive charged-particle emissions and related phenomena},
+  author={Qi, Chong and Liotta, Roberto and Wyss, Ramon},
+  journal={Progress in Particle and Nuclear Physics},
+  volume={105},
+  pages={214--251},
+  year={2019},
+  publisher={Elsevier},
+  url={https://doi.org/10.1016/j.ppnp.2018.11.003}
+}
